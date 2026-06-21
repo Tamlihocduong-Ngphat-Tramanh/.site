@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng nhập - Hệ Thống Khảo Sát Nhận Thức</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    /* GRADIENT DI CHUYỂN SINH ĐỘNG ĐỒNG BỘ HOÀN TOÀN VỚI TRANG CHỦ */
+    body { 
+        min-height: 100vh; display: flex; justify-content: center; align-items: center; 
+        background: linear-gradient(-45deg, #ff7675, #74b9ff, #a29bfe, #fdcb6e, #55efc4); 
+        background-size: 400% 400%; animation: bg 15s ease infinite; padding: 20px; 
+    }
+    @keyframes bg { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    
+    /* KHUNG BOX ĐĂNG NHẬP THEO PHONG CÁCH KÍNH MỜ LIGHT MODE */
+    .box { 
+        width: 460px; background: rgba(255, 255, 255, 0.88); 
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
+        border: 1px solid rgba(255, 255, 255, 0.5); padding: 40px 32px; 
+        border-radius: 24px; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08); 
+        color: #1e293b; position: relative; text-align: center;
+    }
+    
+    h2 { text-align: center; margin-bottom: 25px; font-size: 22px; font-weight: 800; color: #1e293b; letter-spacing: -0.5px; }
+
+    /* THIẾT KẾ THANH CHỌN TAB ĐĂNG NHẬP / ĐĂNG KÝ HÌNH VIÊN THUỐC */
+    .tabs { display: flex; justify-content: center; background: #f1f5f9; padding: 6px; border-radius: 14px; margin-bottom: 25px; gap: 4px; border: 1px solid #e2e8f0; }
+    .tab-btn { flex: 1; padding: 11px 6px; border: none; background: transparent; color: #64748b; font-weight: 700; font-size: 12px; cursor: pointer; border-radius: 10px; transition: 0.2s; white-space: nowrap; }
+    .tab-btn:hover { color: #1e293b; }
+    .tab-btn.active { background: #ffffff; color: #1a73e8; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+    .form-panel { display: none; width: 100%; }
+    .form-panel.active { display: block; animation: fadeIn 0.4s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    .group { position: relative; margin-bottom: 18px; text-align: left; }
+    .group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* Ô NHẬP LIỆU VIỀN MỜ BO GÓC SẠCH SẼ */
+    .group input, .group select { width: 100%; padding: 12px 16px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; outline: none; font-size: 14.5px; color: #1e293b; font-weight: 600; transition: all 0.2s ease; }
+    .group input:focus, .group select:focus { background: #ffffff; border-color: #1a73e8; box-shadow: 0 0 0 4px rgba(26,115,232,0.1); }
+    .group select option { color: #1e293b; background: #fff; }
+
+    /* CÁC ĐƯỜNG LINK TRỢ GIÚP */
+    .helper-links { display: flex; justify-content: space-between; margin: -6px 0 22px 0; padding: 0 2px; gap: 8px; flex-wrap: wrap; }
+    .helper-links a { color: #64748b; font-size: 12.5px; font-weight: 600; text-decoration: none; cursor: pointer; transition: 0.2s; }
+    .helper-links a:hover { color: #1a73e8; text-decoration: underline; }
+
+    /* KHUNG ĐỒNG Ý ĐIỀU KHOẢN */
+    .consent-group { display: flex; align-items: flex-start; gap: 10px; margin: 20px 0; background: #f8fafc; padding: 14px; border-radius: 12px; border: 1px dashed #cbd5e1; text-align: left; }
+    .consent-group input[type="checkbox"] { width: 18px; height: 18px; margin-top: 2px; cursor: pointer; accent-color: #1a73e8; }
+    .consent-group label { font-size: 13px; line-height: 1.5; color: #475569; font-weight: 500; cursor: pointer; user-select: none; }
+
+    /* NÚT HÀNH ĐỘNG CHÍNH CHUẨN ĐẸP */
+    .btn { width: 100%; padding: 14px; background: #1a73e8; border: none; border-radius: 12px; font-size: 15px; font-weight: bold; color: white; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(26,115,232,0.15); text-transform: uppercase; letter-spacing: 0.5px; }
+    .btn:hover { background: #155cb4; transform: translateY(-1px); box-shadow: 0 6px 15px rgba(26,115,232,0.25); }
+    .btn:active { transform: translateY(0); }
+
+    /* PHÂN HỆ PHIÊN ĐĂNG NHẬP CŨ */
+    .keep-login-box { text-align: center; padding: 10px 0; animation: fadeIn 0.4s ease; }
+    .welcome-msg { font-size: 14.5px; margin-bottom: 25px; line-height: 1.6; color: #475569; font-weight: 500; }
+    .welcome-msg strong { color: #1e293b; font-size: 19px; font-weight: 800; display: block; margin-top: 5px; }
+    .btn-switch { margin-top: 14px; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; box-shadow: none; }
+    .btn-switch:hover { background: #e2e8f0; color: #1e293b; box-shadow: none; }
+
+    /* ĐỊNH DẠNG CÁC CỬA SỔ MODAL NỀN SÁNG CAO CẤP */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+    .modal-content { background: #ffffff; width: 100%; max-width: 420px; padding: 30px; border-radius: 24px; border: 1px solid #e2e8f0; color: #1e293b; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); transform: translateY(-20px); transition: transform 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); }
+    .modal-header { font-size: 18px; font-weight: 800; margin-bottom: 20px; text-align: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px; color: #1e293b; letter-spacing: -0.3px; }
+    .modal-footer { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-secondary { background: #f1f5f9; color: #475569; box-shadow: none; }
+    .btn-secondary:hover { background: #e2e8f0; color: #1e293b; box-shadow: none; }
+
+    ::placeholder { color: #94a3b8; font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div class="box">
+    <h2><i class="fa-solid fa-graduation-cap" style="color:#1a73e8; margin-right:6px;"></i> KHẢO SÁT NHẬN THỨC</h2>
+    
+    <div id="navigationTabs" class="tabs">
+        <button class="tab-btn active" onclick="window.switchTab('login', this)">HỌC SINH ĐN</button>
+        <button class="tab-btn" onclick="window.switchTab('register', this)">ĐĂNG KÝ MỚI</button>
+        <button class="tab-btn" onclick="window.switchTab('teacher', this)">GIÁO VIÊN ĐN</button>
+    </div>
+    
+    <div id="keepLoginPanel" class="keep-login-box" style="display: none;">
+        <div class="welcome-msg">
+            Hệ thống nhận diện phiên làm việc trước đó của:
+            <strong id="savedUserName">Nguyễn Văn A</strong>
+            <small id="savedUserId" style="display:block; color:#1a73e8; font-weight:700; margin-top:6px; font-size:12.5px; font-family:monospace;"></small>
+        </div>
+        <button class="btn" onclick="continueSession()"><i class="fa-solid fa-play"></i> Tiếp tục làm bài</button>
+        <button class="btn btn-switch" onclick="forgetAndSwitchAccount()"><i class="fa-solid fa-user-gear"></i> Đăng nhập tài khoản khác</button>
+    </div>
+
+    <div id="loginPanel" class="form-panel active">
+        <div class="group">
+            <label><i class="fa-solid fa-id-card"></i> Nhập mã số học sinh (ID)</label>
+            <input type="text" id="loginId" placeholder="Ví dụ: HS001" style="text-transform: uppercase;">
+        </div>
+        <div class="group">
+            <label><i class="fa-solid fa-lock"></i> Mật khẩu</label>
+            <input type="password" id="loginPassword" placeholder="Nhập mật khẩu của bạn">
+        </div>
+
+        <div class="helper-links">
+            <a onclick="openModal('forgotIdModal')"><i class="fa-solid fa-magnifying-glass"></i> Quên ID?</a>
+            <a onclick="openModal('forgotPwdModal')"><i class="fa-solid fa-key"></i> Quên mật khẩu?</a>
+            <a onclick="openModal('changePwdModal')"><i class="fa-solid fa-rotate"></i> Đổi mật khẩu</a>
+        </div>
+
+        <button class="btn" onclick="loginWithId()">Vào phòng khảo sát</button>
+    </div>
+    
+    <div id="registerPanel" class="form-panel">
+        <div class="group">
+            <label>Họ và Tên</label>
+            <input type="text" id="name" placeholder="Ví dụ: Nguyễn Văn A">
+        </div>
+        
+        <div class="group">
+            <label>Tỉnh/Thành phố</label>
+            <input type="text" id="city" placeholder="Ví dụ: Đà Nẵng">
+        </div>
+        
+        <div class="group">
+            <label>Tuổi</label>
+            <input type="number" id="age" placeholder="Từ 11 đến 15 tuổi">
+        </div>
+        
+        <div class="group">
+            <label>Tên Trường</label>
+            <input type="text" id="school" placeholder="Ví dụ: THCS Nguyễn Khuyến">
+        </div>
+        
+        <div class="group">
+            <label>Khối Lớp</label>
+            <input type="number" id="class" placeholder="Nhập số lớp (6, 7, 8, 9)">
+        </div>
+        
+        <div class="group">
+            <label>Giới tính</label>
+            <select id="gender">
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+            </select>
+        </div>
+
+        <div class="group">
+            <label>Tạo mật khẩu</label>
+            <input type="password" id="registerPassword" placeholder="Thiết lập mật khẩu đăng nhập">
+        </div>
+
+        <div class="consent-group">
+            <input type="checkbox" id="consent">
+            <label for="consent">Tôi xác nhận hoàn toàn tự nguyện tham gia đợt khảo sát sàng lọc nhận thức và cam kết tập trung hoàn thành các bài kiểm tra.</label>
+        </div>
+        
+        <button class="btn" onclick="startSurvey()">Bắt đầu làm bài</button>
+    </div>
+
+    <div id="adminLoginPanel" class="form-panel">
+        <p style="font-size: 14.5px; color: #475569; margin: 15px 0 25px 0; line-height: 1.6; font-weight: 600;">
+            Hệ thống phân luồng dành riêng cho Ban Giám Hiệu và Thầy Cô Quản Trị Học Đường.
+        </p>
+        <button class="btn" style="background: #16a34a; box-shadow: 0 4px 12px rgba(22,163,74,0.25);" onclick="window.location.href='admin.html'">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i> Chuyển qua trang Admin (Quản lý)
+        </button>
+    </div>
+</div>
+
+<div id="forgotIdModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">🔍 Tra cứu lại Mã số ID</div>
+        <div class="group">
+            <label>Họ và Tên</label>
+            <input type="text" id="findIdName" placeholder="Nhập chính xác họ tên">
+        </div>
+        <div class="group">
+            <label>Tên Trường</label>
+            <input type="text" id="findIdSchool" placeholder="Ví dụ: THCS Nguyễn Khuyến">
+        </div>
+        <div class="group">
+            <label>Khối Lớp</label>
+            <input type="number" id="findIdClass" placeholder="Nhập số lớp (6, 7, 8, 9)">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('forgotIdModal')">Hủy</button>
+            <button class="btn" onclick="findStudentId()">Tìm kiếm</button>
+        </div>
+    </div>
+</div>
+
+<div id="forgotPwdModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">🔒 Đặt lại Mật khẩu Mới</div>
+        <div class="group">
+            <label>Mã số học sinh (ID)</label>
+            <input type="text" id="findPwdId" placeholder="Ví dụ: HS001" style="text-transform: uppercase;">
+        </div>
+        <div class="group">
+            <label>Họ tên thật</label>
+            <input type="text" id="findPwdName" placeholder="Nhập chính xác họ tên đã đăng ký">
+        </div>
+        <div class="group">
+            <label>Mật khẩu mới</label>
+            <input type="password" id="newPassword" placeholder="Nhập mật khẩu mới mong muốn">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('forgotPwdModal')">Hủy</button>
+            <button class="btn" onclick="resetPassword()">Cập nhật</button>
+        </div>
+    </div>
+</div>
+
+<div id="changePwdModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">🔄 Thay Đổi Mật Khẩu Khảo Sát</div>
+        <div class="group">
+            <label>Mã số học sinh (ID)</label>
+            <input type="text" id="changePwdId" placeholder="Ví dụ: HS001" style="text-transform: uppercase;">
+        </div>
+        <div class="group">
+            <label>Mật khẩu cũ hiện tại</label>
+            <input type="password" id="oldPassword" placeholder="Nhập mật khẩu cũ để xác thực">
+        </div>
+        <div class="group">
+            <label>Mật khẩu mới</label>
+            <input type="password" id="changeNewPassword" placeholder="Thiết lập mật khẩu mới">
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal('changePwdModal')">Hủy</button>
+            <button class="btn" onclick="submitChangePassword()">Cập nhật mới</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA4YeCvjrLI0bRtvotCOVfGLLsXjVJyb0",
+        authDomain: "bo-tro-cho-tam-li.firebaseapp.com",
+        databaseURL: "https://bo-tro-choi-tam-li-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "bo-tro-cho-tam-li",
+        storageBucket: "bo-tro-cho-tam-li.firebasestorage.app",
+        messagingSenderId: "150226282506",
+        appId: "1:150226282506:web:4df0cab215501b315317f3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    async function hashPassword(password) {
+        const msgBuffer = new TextEncoder().encode(password);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    window.switchTab = function(tabName, btnEl) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.form-panel').forEach(panel => {
+            panel.classList.remove('active');
+            panel.style.display = 'none';
+        });
+        
+        if (tabName === 'login') {
+            const btn = btnEl || document.querySelector('.tabs button:nth-child(1)');
+            if (btn) btn.classList.add('active');
+            document.getElementById('loginPanel').style.display = 'block';
+            document.getElementById('loginPanel').classList.add('active');
+        } else if (tabName === 'register') {
+            const btn = btnEl || document.querySelector('.tabs button:nth-child(2)');
+            if (btn) btn.classList.add('active');
+            document.getElementById('registerPanel').style.display = 'block';
+            document.getElementById('registerPanel').classList.add('active');
+        } else if (tabName === 'teacher') {
+            const btn = btnEl || document.querySelector('.tabs button:nth-child(3)');
+            if (btn) btn.classList.add('active');
+            document.getElementById('adminLoginPanel').style.display = 'block';
+            document.getElementById('adminLoginPanel').classList.add('active');
+        }
+    }
+
+    window.openModal = function(modalId) { document.getElementById(modalId).style.display = 'flex'; }
+    window.closeModal = function(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+        if(modalId === 'changePwdModal') {
+            document.getElementById("changePwdId").value = "";
+            document.getElementById("oldPassword").value = "";
+            document.getElementById("changeNewPassword").value = "";
+        }
+    }
+
+    window.continueSession = function() {
+        let savedUser = JSON.parse(localStorage.getItem("user"));
+        savedUser.loginTime = new Date().toLocaleString("vi-VN");
+        localStorage.setItem("user", JSON.stringify(savedUser));
+        window.location.href = "Code/trangchu.html";
+    }
+
+    window.forgetAndSwitchAccount = function() {
+        localStorage.removeItem("user");
+        document.getElementById("keepLoginPanel").style.display = "none";
+        document.getElementById("navigationTabs").style.display = "flex";
+        window.switchTab('login');
+    }
+
+    window.loginWithId = async function() {
+        let inputId = document.getElementById("loginId").value.trim().toUpperCase();
+        let inputPwd = document.getElementById("loginPassword").value.trim();
+
+        if(inputId === "" || inputPwd === "") {
+            alert("⚠️ Vui lòng nhập đầy đủ Mã số ID và Mật khẩu!");
+            return;
+        }
+
+        let hashedInputPwd = await hashPassword(inputPwd);
+
+        get(child(ref(db), `users/${inputId}`)).then((snapshot) => {
+            if (snapshot.exists()) {
+                let matchedUser = snapshot.val();
+                if(matchedUser.password !== hashedInputPwd) {
+                    alert("❌ Mật khẩu không chính xác! Vui lòng thử lại.");
+                    return;
+                }
+                matchedUser.loginTime = new Date().toLocaleString("vi-VN");
+                localStorage.setItem("user", JSON.stringify(matchedUser));
+                alert(`🎉 Đăng nhập thành công! Xin chào học sinh: ${matchedUser.name}`);
+                window.location.href = "Code/trangchu.html";
+            } else {
+                alert("❌ Không tìm thấy Mã số ID này trên đám mây Firebase!");
+            }
+        }).catch((error) => {
+            alert("❌ Lỗi kết nối cơ sở dữ liệu: " + error);
+        });
+    }
+
+    window.startSurvey = async function(){
+        let name = document.getElementById("name").value.trim();
+        let city = document.getElementById("city").value.trim();
+        let age = document.getElementById("age").value.trim();
+        let school = document.getElementById("school").value.trim();
+        let classVal = document.getElementById("class").value.trim();
+        let gender = document.getElementById("gender").value;
+        let password = document.getElementById("registerPassword").value.trim();
+
+        if(name == "" || city == "" || age == "" || school == "" || classVal == "" || password == ""){
+            alert("⚠️ Vui lòng điền và thiết lập đầy đủ tất cả thông tin!"); 
+            return;
+        }
+
+        let userAge = parseInt(age, 10);
+        if(userAge < 11 || userAge > 15) {
+            alert("⚠️ Không được phép tham gia khi không thuộc lứa tuổi THCS (11-15 tuổi)!"); 
+            return;
+        }
+
+        let userClass = parseInt(classVal, 10);
+        if(isNaN(userClass) || userClass < 6 || userClass > 9) {
+            alert("⚠️ Không được phép tham gia! Chỉ dành cho học sinh thuộc cấp THCS."); 
+            return;
+        }
+
+        if(!document.getElementById("consent").checked) {
+            alert("⚠️ Bạn cần xác nhận đồng ý tham gia ở hộp kiểm phía trên!"); 
+            return;
+        }
+
+        let hashedRegisterPwd = await hashPassword(password);
+
+        get(child(ref(db), 'users')).then((snapshot) => {
+            let nextId = "HS001";
+            if (snapshot.exists()) {
+                let usersData = snapshot.val();
+                let existingNums = new Set();
+                
+                Object.keys(usersData).forEach(id => {
+                    if (id.startsWith("HS")) {
+                        let num = parseInt(id.substring(2), 10);
+                        if (!isNaN(num)) existingNums.add(num);
+                    }
+                });
+                
+                let missingNum = 1;
+                while (existingNums.has(missingNum)) {
+                    missingNum++;
+                }
+                
+                nextId = "HS" + String(missingNum).padStart(3, '0');
+            }
+
+            // Đstretch: Đã cập nhật bổ sung trường 'password_raw' phía dưới
+            let user = {
+                id: nextId, 
+                name: name, 
+                city: city, 
+                age: age, 
+                school: school, 
+                class: classVal, 
+                gender: gender, 
+                password: hashedRegisterPwd, 
+                password_raw: password, 
+                loginTime: new Date().toLocaleString("vi-VN")
+            };
+
+            set(ref(db, 'users/' + nextId), user).then(() => {
+                localStorage.setItem("user", JSON.stringify(user));
+                alert(`🎉 Đăng ký thành công! Mã số học sinh đám mây của bạn là: ${nextId}\nHãy ghi nhớ mã ID này và Mật khẩu để đăng nhập lần sau.`);
+                window.location.href = "Code/trangchu.html";
+            });
+        });
+    }
+
+    window.findStudentId = function() {
+        let fName = document.getElementById("findIdName").value.trim().toLowerCase();
+        let fSchool = document.getElementById("findIdSchool").value.trim().toLowerCase();
+        let fClass = document.getElementById("findIdClass").value.trim();
+
+        if(fName === "" || fSchool === "" || fClass === "") {
+            alert("⚠️ Vui lòng nhập đủ Họ tên, Trường và Khối lớp!");
+            return;
+        }
+
+        get(child(ref(db), 'users')).then((snapshot) => {
+            if (snapshot.exists()) {
+                let users = Object.values(snapshot.val());
+                let match = users.find(u => u.name.toLowerCase() === fName && u.school.toLowerCase() === fSchool && u.class === fClass);
+                if(match) {
+                    alert(`✅ Hệ thống đám mây tìm thấy ID của bạn!\n👉 Mã số ID: ${match.id}`);
+                    document.getElementById("loginId").value = match.id;
+                    window.closeModal('forgotIdModal');
+                } else {
+                    alert("❌ Không tìm thấy dữ liệu học sinh khớp trên Firebase.");
+                }
+            }
+        });
+    }
+
+    window.resetPassword = async function() {
+        let fId = document.getElementById("findPwdId").value.trim().toUpperCase();
+        let fName = document.getElementById("findPwdName").value.trim().toLowerCase();
+        let newPwd = document.getElementById("newPassword").value.trim();
+
+        if(fId === "" || fName === "" || newPwd === "") {
+            alert("⚠️ Vui lòng điền đầy đủ thông tin!");
+            return;
+        }
+
+        let hashedResetPwd = await hashPassword(newPwd);
+
+        get(child(ref(db), `users/${fId}`)).then((snapshot) => {
+            if (snapshot.exists()) {
+                let u = snapshot.val();
+                if (u.name.toLowerCase() === fName) {
+                    u.password = hashedResetPwd;
+                    u.password_raw = newPwd; // Cập nhật cả pass thô khi reset để Admin nắm được
+                    set(ref(db, 'users/' + fId), u).then(() => {
+                        alert("🎉 Cập nhật mật khẩu mới lên Firebase thành công!");
+                        window.closeModal('forgotPwdModal');
+                    });
+                } else { alert("❌ Xác minh danh tính họ tên không khớp!"); }
+            } else { alert("❌ ID không tồn tại!"); }
+        });
+    }
+
+    window.submitChangePassword = async function() {
+        let cId = document.getElementById("changePwdId").value.trim().toUpperCase();
+        let oldPwd = document.getElementById("oldPassword").value.trim();
+        let newPwd = document.getElementById("changeNewPassword").value.trim();
+
+        if(cId === "" || oldPwd === "" || newPwd === "") {
+            alert("⚠️ Vui lòng điền đầy đủ thông tin!");
+            return;
+        }
+
+        let hashedOldPwd = await hashPassword(oldPwd);
+        let hashedNewPwd = await hashPassword(newPwd);
+
+        get(child(ref(db), `users/${cId}`)).then((snapshot) => {
+            if (snapshot.exists()) {
+                let u = snapshot.val();
+                if (u.password !== hashedOldPwd) {
+                    alert("❌ Mật khẩu cũ không chính xác!");
+                    return;
+                }
+                u.password = hashedNewPwd;
+                u.password_raw = newPwd; // Cập nhật cả pass thô khi đổi mật khẩu để Admin nắm được
+                set(ref(db, 'users/' + cId), u).then(() => {
+                    alert("🎉 Thay đổi mật khẩu tài khoản đám mây thành công!");
+                    window.closeModal('changePwdModal');
+                });
+            } else { alert("❌ Mã số ID không tồn tại!"); }
+        });
+    }
+
+    let savedUser = localStorage.getItem("user");
+    if (savedUser) {
+        try {
+            let userData = JSON.parse(savedUser);
+            if (userData && userData.name) {
+                document.getElementById("savedUserName").innerText = userData.name;
+                document.getElementById("savedUserId").innerText = `Mã số ID: ${userData.id || "Chưa cấp"}`;
+                document.getElementById("keepLoginPanel").style.display = "block";
+                document.getElementById("loginPanel").style.display = "none";
+                document.getElementById("registerPanel").style.display = "none";
+                document.getElementById("adminLoginPanel").style.display = "none";
+                document.getElementById("navigationTabs").style.display = "none";
+            }
+        } catch (e) {}
+    }
+</script>
+</body>
+</html>

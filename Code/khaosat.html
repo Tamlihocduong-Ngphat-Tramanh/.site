@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khảo Sát Tâm Lý & Chuỗi Ngày Luyện Tập</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    body { 
+        min-height: 100vh;
+        background: linear-gradient(-45deg, #ff7675, #74b9ff, #a29bfe, #fdcb6e, #55efc4); 
+        background-size: 400% 400%; 
+        animation: bgmove 15s ease infinite; 
+        display: flex; 
+        flex-direction: column;
+        overflow-x: hidden;
+    }
+    
+    @keyframes bgmove { 0%{background-position:0% 50%;} 50%{background-position:100% 50%;} 100%{background-position:0% 50%;} }
+
+    /* TOP NAVBAR */
+    .top-navbar {
+        width: 100%; height: 75px; background: rgba(255, 255, 255, 0.92);
+        backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.5); display: flex;
+        justify-content: space-between; align-items: center;
+        padding: 0 30px; position: fixed; top: 0; left: 0; z-index: 1000;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; text-decoration: none; }
+    .nav-logo-emoji { font-size: 26px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+    .nav-brand h3 { color: #1e293b; font-size: 17px; font-weight: 800; letter-spacing: -0.3px; }
+
+    .nav-links { display: flex; align-items: center; gap: 4px; }
+    .btn-back-home {
+        padding: 10px 20px; border: none; background: #1a73e8;
+        color: white; font-size: 13.5px; font-weight: 700;
+        border-radius: 50px; cursor: pointer; transition: all 0.25s ease;
+        display: flex; align-items: center; gap: 6px; text-decoration: none;
+        box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+    }
+    .btn-back-home:hover { background: #155cb4; transform: translateY(-1px); box-shadow: 0 6px 16px rgba(26, 115, 232, 0.3); }
+
+    .nav-right { display: flex; align-items: center; gap: 15px; }
+    .user-profile-widget { display: flex; align-items: center; gap: 10px; background: white; padding: 6px 14px; border-radius: 14px; border: 1px solid #e2e8f0; cursor: default; }
+    .user-avatar-circle { width: 34px; height: 34px; border-radius: 50%; background: #e8f0fe; color: #1a73e8; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 1px solid #cbd5e1; }
+    .user-meta { text-align: left; }
+    .user-meta h4 { font-size: 13px; font-weight: 700; color: #1e293b; }
+    .user-meta p { font-size: 11px; color: #64748b; font-weight: 600; }
+
+    /* LAYOUT CONTENT */
+    .main-content { 
+        flex: 1; width: 100%; max-width: 1250px; 
+        margin: 110px auto 40px auto; padding: 0 20px; 
+    }
+
+    .dashboard-layout-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; align-items: start; }
+    @media (max-width: 950px) { .dashboard-layout-grid { grid-template-columns: 1fr; } }
+
+    .panel-card-container { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 24px; padding: 35px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: left; }
+    
+    /* STREAK FLAME WIDGET */
+    .streak-banner {
+        background: linear-gradient(135deg, #ff9f43, #ff5252);
+        color: white; padding: 25px; border-radius: 20px; margin-bottom: 25px;
+        display: flex; align-items: center; justify-content: space-between;
+        box-shadow: 0 8px 24px rgba(255, 82, 82, 0.2); border: 1px solid rgba(255,255,255,0.2);
+    }
+    .streak-banner-left { text-align: left; }
+    .streak-banner-left h2 { font-size: 20px; font-weight: 800; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .streak-banner-left p { font-size: 13.5px; opacity: 0.9; font-weight: 500; }
+    .level-badge { background: rgba(255, 255, 255, 0.25); padding: 4px 12px; border-radius: 50px; font-size: 12px; font-weight: 800; border: 1px solid rgba(255,255,255,0.4); margin-left: 5px; text-transform: uppercase; }
+    .streak-flame-score { font-size: 46px; font-weight: 900; display: flex; align-items: center; gap: 5px; text-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+    /* SURVEY COMPONENT STYLE */
+    .survey-q-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+    .survey-q-box h4 { font-size: 15px; font-weight: 800; color: #1e293b; margin-bottom: 12px; line-height: 1.4; }
+    
+    .survey-options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    @media (max-width: 550px) { .survey-options-grid { grid-template-columns: 1fr; } }
+    
+    .survey-label {
+        background: white; border: 1px solid #cbd5e1; padding: 12px 16px;
+        border-radius: 50px; font-size: 13.5px; font-weight: 600; color: #475569;
+        cursor: pointer; display: flex; align-items: center; gap: 10px;
+        transition: all 0.2s ease; user-select: none;
+    }
+    .survey-label:hover { background: #f1f5f9; border-color: #94a3b8; color: #1e293b; }
+    .survey-label input[type="radio"] { width: 16px; height: 16px; accent-color: #1a73e8; cursor: pointer; }
+    .survey-label.selected { background: #e8f0fe; border-color: #1a73e8; color: #1a73e8; box-shadow: 0 2px 8px rgba(26,115,232,0.1); }
+
+    .btn-submit { width: 100%; padding: 15px; border: none; border-radius: 50px; background: #1a73e8; color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 4px 12px rgba(26, 115, 232, 0.15); display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 25px; }
+    .btn-submit:hover { background: #155cb4; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(26,115,232,0.25); }
+    .btn-submit:active { transform: scale(0.96); }
+
+    /* LEADERBOARD SIDEBAR STYLE */
+    .leaderboard-panel { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px; display: flex; flex-direction: column; }
+    .leaderboard-panel h3 { text-align: center; color: #e65100; margin-bottom: 2px; font-size: 16px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .leaderboard-panel p { text-align: center; font-size: 12px; color: #94a3b8; margin-bottom: 16px; font-style: italic; font-weight: 500; }
+    .leaderboard-list { max-height: 450px; overflow-y: auto; }
+    .leaderboard-item { padding: 12px 8px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; font-size: 13.5px; transition: background 0.2s ease; }
+    .leaderboard-item:hover { background: #f8fafc; }
+    .streak-count-tag { background: #fff3e0; color: #e65100; font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 50px; display: flex; align-items: center; gap: 4px; border: 1px solid #ffe0b2; }
+</style>
+</head>
+<body>
+
+<header class="top-navbar">
+    <a class="nav-brand" href="trangchu.html">
+        <div class="nav-logo-emoji">🧠</div>
+        <div class="nav-brand-text">
+            <h3>Nền Tảng Nhận Thức</h3>
+        </div>
+    </a>
+    
+    <nav class="nav-links">
+        <a class="btn-back-home" href="trangchu.html"><i class="fa-solid fa-house"></i> Quay Về Trang Chủ</a>
+    </nav>
+    
+    <div class="nav-right">
+        <div class="user-profile-widget">
+            <div class="user-avatar-circle">👤</div>
+            <div class="user-meta">
+                <h4 id="profileName">Học sinh</h4>
+                <p id="profileClass">Khối lớp --</p>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="main-content">
+    <div class="dashboard-layout-grid">
+        
+        <div>
+            <div class="streak-banner">
+                <div class="streak-banner-left">
+                    <h2><i class="fa-solid fa-fire"></i> CHUỖI PHÁT TRIỂN <span class="level-badge" id="levelDisplayTag">LEVEL 1</span></h2>
+                    <p id="streakMotivationText">Hãy hoàn thành khảo sát trạng thái tâm lý mỗi ngày để duy trì ngọn lửa rèn luyện!</p>
+                </div>
+                <div class="streak-flame-score">
+                    <span id="streakNumberDisplay">0</span><span style="font-size:32px;">🔥</span>
+                </div>
+            </div>
+
+            <div class="panel-card-container">
+                <h2 id="surveyTitleHeader" style="font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-clipboard-question" style="color:#1a73e8;"></i> Khảo Sát Chỉ Số Tâm Lý Thường Nhật
+                </h2>
+
+                <form id="dailySurveyForm">
+                    <div id="dynamicQuestionsArea"></div>
+                    <button type="button" class="btn-submit" onclick="window.submitDailySurvey()"><i class="fa-solid fa-paper-plane"></i> Gửi kết quả & Thăng cấp Cấp độ 🔥</button>
+                </form>
+            </div>
+        </div>
+
+        <div>
+            <div class="leaderboard-panel">
+                <h3><i class="fa-solid fa-fire" style="color:#e65100;"></i> BẢNG XẾP HẠNG CHUỖI 🔥</h3>
+                <p>(Top 10 Thần Sấm duy trì rèn luyện)</p>
+                <div id="streakLeaderboardContent" class="leaderboard-list">
+                    <p style='text-align:center; padding: 15px 0; color: #94a3b8;'>🔄 Đang đồng bộ chuỗi lửa...</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, get, child, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyA4YeCvjrLI0bRtvotCOVfGLLsXjVJyb0",
+        authDomain: "bo-tro-cho-tam-li.firebaseapp.com",
+        databaseURL: "https://bo-tro-choi-tam-li-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "bo-tro-cho-tam-li",
+        storageBucket: "bo-tro-cho-tam-li.firebasestorage.app",
+        messagingSenderId: "150226282506",
+        appId: "1:150226282506:web:4df0cab215501b315317f3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // KHO DỮ LIỆU CẤU TRÚC 10 LEVEL X 5 TUẦN CẬP NHẬT XOAY VÒNG (50 BỘ CÂU HỎI)
+    const surveyLevelsPool = {
+        1: { // LEVEL 1: NHẬN DIỆN VÀ Ý THỨC CẢM XÚC BẢN THÂN
+            week1: { title: "Cấp độ 1 - Tuần 1: Gọi Tên Cảm Xúc Thường Nhật", questions: [
+                { id: "q1", text: "Hôm nay em cảm thấy trạng thái tinh thần chủ đạo nào xuất hiện nhiều nhất?", options: ["Vui vẻ, tràn đầy năng lượng", "Bình yên, thư thả", "Lo lắng, bồn chồn bứt rứt", "Mệt mỏi, uể oải chán nản"] },
+                { id: "q2", text: "Em có nhận ra nguyên nhân cụ thể nào khiến cảm xúc đó xuất hiện không?", options: ["Hiểu rất rõ lý do từ đâu", "Mơ hồ đoán được một phần", "Hoàn toàn không rõ nguyên nhân", "Em không bận tâm suy nghĩ"] }
+            ]},
+            week2: { title: "Cấp độ 1 - Tuần 2: Quản Lý Biến Động Tâm Trạng", questions: [
+                { id: "q1", text: "Khi bất chợt gặp chuyện bực bội trong ngày, phản ứng đầu tiên của em là gì?", options: ["Im lặng suy nghĩ tìm cách xử lý", "Trút giận ra lời nói hoặc hành động", "Giữ trong lòng và chịu đựng", "Tìm bạn bè/người thân nói chuyện ngay"] },
+                { id: "q2", text: "Mức độ kiểm soát cơn nóng giận của em hôm nay đạt điểm mấy?", options: ["Tuyệt vời (Không hề nổi giận)", "Khá tốt (Biết kiềm chế đúng lúc)", "Trung bình (Đôi lúc còn gắt gỏng)", "Kém (Dễ nổi cáu vô cớ)"] }
+            ]},
+            week3: { title: "Cấp độ 1 - Tuần 3: Ý Thức Năng Lượng Tinh Thần", questions: [
+                { id: "q1", text: "Năng lượng tinh thần vào buổi sáng thức dậy của em như thế nào?", options: ["Sảng khoái, tràn đầy hứng khởi", "Bình thường, hơi ngái ngủ chút", "Uể oải, chỉ muốn ngủ tiếp", "Áp lực và sợ hãi ngày mới"] },
+                { id: "q2", text: "Điều gì khôi phục năng lượng cho em nhanh nhất sau giờ học căng thẳng?", options: ["Nghỉ ngơi, ngủ một giấc ngắn", "Chơi thể thao, vận động thể chất", "Lướt mạng xã hội, xem video", "Trò chuyện, ăn uống cùng gia đình"] }
+            ]},
+            week4: { title: "Cấp độ 1 - Tuần 4: Chấp Nhận Sự Khác Biệt Cảm Xúc", questions: [
+                { id: "q1", text: "Nếu hôm nay là một ngày tồi tệ và nhiều nỗi buồn, em sẽ đối xử với bản thân thế nào?", options: ["Cho phép bản thân buồn và thả lỏng", "Tự trách móc và ép mình phải mạnh mẽ", "Cố gắng lảng tránh bằng việc khác", "Tìm kiếm sự an ủi từ xung quanh"] },
+                { id: "q2", text: "Em có thường xuyên so sánh tâm trạng vui/buồn của mình với các bạn trên mạng xã hội?", options: ["Không bao giờ, em tập trung vào mình", "Thỉnh thoảng có chút chạnh lòng", "Thường xuyên thấy tủi thân", "Luôn luôn áp lực vì thấy bạn khác hoàn hảo"] }
+            ]},
+            week5: { title: "Cấp độ 1 - Tuần 5: Nuôi Dưỡng Lòng Biết Ơn", questions: [
+                { id: "q1", text: "Hôm nay, em có nhìn thấy hoặc trải nghiệm được điều tốt đẹp nhỏ bé nào không?", options: ["Có, rất nhiều điều đáng yêu", "Có một vài chuyện bình thường", "Không có gì đặc biệt xảy ra", "Mọi thứ xung quanh thật tẻ nhạt"] },
+                { id: "q2", text: "Em có gửi lời cảm ơn hay làm một việc tốt giúp đỡ ai trong ngày hôm nay chưa?", options: ["Đã làm và cảm thấy rất vui", "Có dự định nhưng chưa có cơ hội", "Chưa làm vì em khá bận rộn", "Em thấy không cần thiết lắm"] }
+            ]}
+        },
+        2: { // LEVEL 2: ÁP LỰC HỌC ĐƯỜNG VÀ QUẢN LÝ THI CỬ
+            week1: { title: "Cấp độ 2 - Tuần 1: Nhận Diện Áp Lực Điểm Số", questions: [
+                { id: "q1", text: "Nguồn áp lực học tập lớn nhất hiện tại của em xuất phát từ đâu?", options: ["Kỳ vọng từ cha mẹ, gia đình", "Áp lực tự thân muốn hoàn hảo", "Sự cạnh tranh điểm số từ bạn bè", "Khối lượng bài vở, thi cử quá dày"] },
+                { id: "q2", text: "Khi nhận một điểm số không như mong đợi, em đối diện ra sao?", options: ["Bình tĩnh xem lại lỗi sai để sửa", "Buồn bã, chán nản mất vài ngày", "Lo sợ bị trách phạt, giấu điểm", "Bỏ mặc, không quan tâm đến môn đó"] }
+            ]},
+            week2: { title: "Cấp độ 2 - Tuần 2: Hội Chứng Sợ Thi Cử (Exam Anxiety)", questions: [
+                { id: "q1", text: "Khi kỳ kiểm tra/kỳ thi đến gần, cơ thể em có biểu hiện nào dưới đây?", options: ["Hoàn toàn bình thường, tự tin", "Hơi hồi hộp nhẹ, tim đập nhanh", "Mất ngủ, đau dạ dày hoặc đau đầu", "Hoảng loạn, trống rỗng kiến thức"] },
+                { id: "q2", text: "Em thường chuẩn bị tâm lý trước phòng thi bằng cách nào?", options: ["Hít thở sâu, tự trấn an bản thân", "Cố gắng nhồi nhét bài đến phút chót", "Nói chuyện phiếm với bạn để quên lo lắng", "Cam chịu và phó mặc cho may rủi"] }
+            ]},
+            week3: { title: "Cấp độ 2 - Tuần 3: Đối Phó Khối Lượng Bài Tập Lớn", questions: [
+                { id: "q1", text: "Khi nhìn thấy danh sách bài tập về nhà dày đặc, phản ứng đầu tiên của em là gì?", options: ["Lập kế hoạch chia nhỏ ra làm ngay", "Uể oải than thở nhưng vẫn làm muộn", "Trì hoãn, đợi sát giờ mới cuống cuồng", "Bỏ cuộc, chấp nhận lên lớp chép bài"] },
+                { id: "q2", text: "Hôm nay em có phải thức khuya sau 11h đêm để hoàn thành bài vở không?", options: ["Không, em sắp xếp xong sớm", "Đôi khi muộn một chút", "Thường xuyên thức rất khuya", "Luôn luôn thức xuyên đêm học bài"] }
+            ]},
+            week4: { title: "Cấp độ 2 - Tuần 4: Phương Pháp Học Tập Chủ Động", questions: [
+                { id: "q1", text: "Mức độ chủ động phát biểu hoặc đặt câu hỏi tranh luận trong giờ học của em?", options: ["Rất tích cực, không ngại sai", "Chỉ trả lời khi thầy cô chỉ định", "Ngại ngùng, sợ sai nên giữ im lặng", "Không quan tâm đến bài giảng"] },
+                { id: "q2", text: "Em có thói quen tự tổng hợp lại kiến thức bằng sơ đồ tư duy hay ghi chú riêng không?", options: ["Thường xuyên tự làm hệ thống bài", "Thỉnh thoảng làm khi bài quá khó", "Hầu như không làm, chỉ học vẹt", "Không bao giờ nghe đến phương pháp này"] }
+            ]},
+            week5: { title: "Cấp độ 2 - Tuần 5: Điểm Tựa Tinh Thần Học Đường", questions: [
+                { id: "q1", text: "Khi gặp một bài toán cực khó hoặc không hiểu bài, em tin tưởng nhờ cậy ai nhất?", options: ["Thầy cô bộ môn / Thầy cô chủ nhiệm", "Bạn bè học tốt trong lớp", "Tìm kiếm Internet / Học gia sư", "Giấu kín, tự chịu bó tay học vẹt"] },
+                { id: "q2", text: "Em có cảm thấy không gian trường lớp hiện tại là nơi an toàn để chia sẻ khó khăn học tập?", options: ["Rất an toàn và ấm áp", "Bình thường, đủ để học tập", "Hơi e dè, ngại chia sẻ", "Cực kỳ ngột ngạt và cô độc"] }
+            ]}
+        },
+        3: { // LEVEL 3: MỐI QUAN HỆ BẠN BÈ VÀ ÁP LỰC ĐỒNG LỨA (PEER PRESSURE)
+            week1: { title: "Cấp độ 3 - Tuần 1: Sự Hòa Nhập Tập Thể", questions: [
+                { id: "q1", text: "Em cảm thấy vị trí của mình trong tập thể lớp như thế nào?", options: ["Được yêu thương, gắn kết chặt chẽ", "Bình thường, có nhóm bạn riêng", "Khá mờ nhạt, ít ai chú ý", "Bị cô lập, lạc lõng hoàn toàn"] },
+                { id: "q2", text: "Khi tham gia làm việc nhóm, em thường đóng vai trò gì?", options: ["Trưởng nhóm điều phối tích cực", "Thành viên hoàn thành tốt việc giao", "Ít đóng góp, dựa dẫm vào người khác", "Gây bất đồng, khó làm việc chung"] }
+            ]},
+            week2: { title: "Cấp độ 3 - Tuần 2: Vượt Qua Áp Lực Đồng Lứa", questions: [
+                { id: "q1", text: "Nhìn thấy các bạn xung quanh giỏi giang, đạt nhiều giải thưởng, em cảm thấy thế nào?", options: ["Ngưỡng mộ, lấy đó làm động lực cố gắng", "Áp lực, tự ti thấy mình kém cỏi", "Ghen tị, không phục", "Thờ ơ, không quan tâm việc người khác"] },
+                { id: "q2", text: "Em có từng làm theo một hành vi xấu chỉ vì sợ bị bạn bè tẩy chay, coi lập dị?", options: ["Không bao giờ, em có chính kiến riêng", "Đôi khi xuôi theo cho yên chuyện", "Đã từng tham gia vì sợ cô độc", "Thường xuyên làm vậy để thể hiện"] }
+            ]},
+            week3: { title: "Cấp độ 3 - Tuần 3: Giải Quyết Xung Đột Bạn Bè", questions: [
+                { id: "q1", text: "Khi xảy ra hiểu lầm hoặc cãi vã với bạn thân, em chọn cách nào?", options: ["Hẹn gặp trực tiếp nói rõ thẳng thắn", "Chiến tranh lạnh, chờ đối phương xin lỗi", "Đăng bài ẩn ý, nói xấu sau lưng", "Cắt đứt mối quan hệ không luyến tiếc"] },
+                { id: "q2", text: "Hôm nay mối quan hệ giao tiếp xã hội xung quanh em mang lại cảm xúc gì?", options: ["Vui vẻ, tràn đầy tiếng cười", "Bình yên, không có xích mích", "Hơi căng thẳng, khó xử", "Rất mệt mỏi vì thị phi, nói xấu"] }
+            ]},
+            week4: { title: "Cấp độ 3 - Tuần 4: Độc Hại Trên Không Gian Mạng (Cyberbullying)", questions: [
+                { id: "q1", text: "Em ứng xử thế nào trước các bình luận tiêu cực, công kích cá nhân trên mạng xã hội?", options: ["Phớt lờ, block ngay không bận tâm", "Buồn bã, đọc đi đọc lại nhiều lần", "Bình luận đôi co, cãi vã căng thẳng", "Bị ám ảnh, ảnh hưởng nặng đến đời thực"] },
+                { id: "q2", text: "Em có từng vô tình chia sẻ hay hùa theo bình luận bêu xấu một người khác trên mạng?", options: ["Không bao giờ làm điều độc hại đó", "Đôi khi tò mò chấm hóng xem drama", "Đã từng làm và cảm thấy hối hận", "Thấy bình thường, mạng xã hội giải trí"] }
+            ]},
+            week5: { title: "Cấp độ 3 - Tuần 5: Chọn Bạn Mà Chơi", questions: [
+                { id: "q1", text: "Tiêu chí quan trọng nhất giúp em lựa chọn người bạn thân thiết đồng hành là gì?", options: ["Sự chân thành, thấu hiểu và tử tế", "Hợp tính cách, cùng chung sở thích", "Bạn học giỏi, có lợi cho bài vở", "Nổi tiếng, sành điệu, có điều kiện"] },
+                { id: "q2", text: "Những người bạn thân hiện tại có thúc đẩy em trở thành phiên bản tốt hơn không?", options: ["Cùng nhau tiến bộ, chăm ngoan hơn", "Chỉ cùng nhau đi chơi giải trí", "Đôi lúc kéo nhau lười biếng, sa sút", "Em chưa có một người bạn thực sự"] }
+            ]}
+        },
+        4: { // LEVEL 4: ĐỘNG LỰC NỘI TẠI VÀ THIẾT LẬP MỤC TIÊU BẢN THÂN
+            week1: { title: "Cấp độ 4 - Tuần 1: Động Cơ Học Tập", questions: [
+                { id: "q1", text: "Em học tập chăm chỉ mỗi ngày vì mục đích cốt lõi nào?", options: ["Yêu thích kiến thức, muốn phát triển bản thân", "Học để đền đáp cha mẹ, thầy cô", "Học vì điểm số và danh hiệu bắt buộc", "Học đối phó, không rõ học để làm gì"] },
+                { id: "q2", text: "Khi mất hết động lực, điều gì giúp em vực dậy tinh thần mạnh mẽ nhất?", options: ["Nghĩ về ước mơ, tương lai mong muốn", "Lời động viên từ gia đình, thầy cô", "Xem các video truyền cảm hứng tích cực", "Chờ đợi tâm trạng tự tốt lên"] }
+            ]},
+            week2: { title: "Cấp độ 4 - Tuần 2: Kỹ Năng Thiết Lập Mục Tiêu (SMART)", questions: [
+                { id: "q1", text: "Em có thói quen ghi mục tiêu học tập rõ ràng ra giấy/sổ tay không?", options: ["Có kế hoạch chi tiết từng ngày/tuần", "Chỉ nhẩm tính mục tiêu lớn trong đầu", "Thỉnh thoảng viết khi có kỳ thi lớn", "Không bao giờ thiết lập mục tiêu trước"] },
+                { id: "q2", text: "Mức độ hoàn thành các mục tiêu em tự đề ra trong ngày đạt bao nhiêu phần trăm?", options: ["Hoàn thành xuất sắc trên 90%", "Đạt mức trung bình từ 50% - 80%", "Dưới 50%, thường bỏ dở nửa chừng", "Hầu như không thực hiện được gì"] }
+            ]},
+            week3: { title: "Cấp độ 4 - Tuần 3: Vượt Qua Thói Quen Trì Hoãn (Procrastination)", questions: [
+                { id: "q1", text: "Khi gặp bài tập khó, mức độ trì hoãn của em diễn ra thế nào?", options: ["Bắt tay vào làm ngay lập tức", "Lướt điện thoại 15-30 phút rồi mới làm", "Để muộn sát giờ nộp mới làm vội", "Trì hoãn đến mức bỏ quên luôn bài"] },
+                { id: "q2", text: "Vũ khí hiệu quả nhất giúp em chống lại thói quen trì hoãn hôm nay là gì?", options: ["Tắt nguồn điện thoại, cách ly thiết bị", "Nhờ bạn bè nhắc nhở học đôi", "Áp dụng quy tắc tập trung 25 phút (Pomodoro)", "Chưa tìm ra giải pháp, vẫn bị trì hoãn"] }
+            ]},
+            week4: { title: "Cấp độ 4 - Tuần 4: Kiên Trì Trước Thất Bại", questions: [
+                { id: "q1", text: "Khi liên tiếp gặp bài toán khó giải không ra, phản ứng của em?", options: ["Kiên nhẫn thử lại bằng nhiều cách khác", "Tạm gác lại, tìm tài liệu hỏi người khác", "Cảm thấy bực bội, xé nháp bỏ cuộc", "Tự trách mình ngu ngốc, bất lực"] },
+                { id: "q2", text: "Em định nghĩa thế nào về một lần thất bại trong học tập?", options: ["Bài học quý giá để tiến bộ hơn", "Thử thách tạm thời cần vượt qua", "Sự hổ thẹn, yếu kém của bản thân", "Dấu chấm hết, không thể cứu vãn"] }
+            ]},
+            week5: { title: "Cấp độ 4 - Tuần 5: Phần Thưởng Cho Sự Cố Gắng", options: [
+                { id: "q1", text: "Em có thường xuyên tự thưởng cho bản thân khi đạt một thành tích nhỏ?", options: ["Luôn khích lệ, yêu thương bản thân đúng lúc", "Hiếm khi, em thấy đó là nghĩa vụ phải làm", "Chỉ chờ đợi phần thưởng từ cha mẹ", "Luôn tự trách khắt khe chứ không thưởng"] },
+                { id: "q2", text: "Hôm nay em cảm thấy mình xứng đáng nhận lời khen ngợi ở điểm nào?", options: ["Sự nỗ lực tập trung tối đa", "Sự tử tế, giúp đỡ mọi người xung quanh", "Việc tuân thủ đúng giờ giấc", "Hôm nay em thấy mình chưa làm tốt"] }
+            ]}
+        },
+        5: { // LEVEL 5: TƯ DUY PHẢN BIỆN VÀ TRUYỀN THÔNG SỐ
+            week1: { title: "Cấp độ 5 - Tuần 1: Tiếp Nhận Thông Tin Đa Chiều", questions: [
+                { id: "q1", text: "Khi đọc được một tin tức giật gân trên mạng xã hội, em sẽ làm gì đầu tiên?", options: ["Kiểm tra nguồn tin, tìm chứng cứ xác thực", "Tin tưởng ngay và chia sẻ cho bạn bè biết", "Đọc giải trí, không bận tâm đúng sai", "Chỉ đọc phần bình luận xem đám đông nói gì"] },
+                { id: "q2", text: "Em có sẵn sàng thay đổi góc nhìn khi người khác đưa ra lập luận thuyết phục trái ngược?", options: ["Sẵn sàng lắng nghe và học hỏi cái đúng", "Bảo vệ quan điểm đến cùng bằng mọi giá", "Im lặng nhưng trong lòng không phục", "Không quan tâm ai đúng ai sai"] }
+            ]},
+            week2: { title: "Cấp độ 5 - Tuần 2: Kiểm Soát Phát Ngôn Bản Thân", questions: [
+                { id: "q1", text: "Trước khi bình luận hay đăng tải điều gì lên mạng, em có suy nghĩ đến hậu quả?", options: ["Luôn cân nhắc kỹ lưỡng, văn minh", "Thích gì đăng nấy theo cảm xúc nhất thời", "Chỉ đăng chế độ riêng tư ít ai thấy", "Nghĩ mạng là ảo nên không cần chịu trách nhiệm"] },
+                { id: "q2", text: "Mức độ sử dụng ngôn từ bừa bãi, thiếu chuẩn mực của em gần đây?", options: ["Hoàn toàn không sử dụng từ ngữ tiêu cực", "Đôi khi lỡ lời khi nói chuyện với bạn thân", "Thường xuyên nói tục theo thói quen đám đông", "Sử dụng để giải tỏa áp lực, công kích"] }
+            ]},
+            week3: { title: "Cấp độ 5 - Tuần 3: Tác Động Của Thuật Toán Thao Túng", questions: [
+                { id: "q1", text: "Em có nhận ra các video ngắn (Tiktok/Reels) đang làm giảm khả năng đọc sách sâu của mình?", options: ["Nhận thấy rõ và đang chủ động hạn chế", "Có biết nhưng không thể dứt ra được", "Thấy bình thường, xem video tiện lợi hơn", "Không quan tâm, em không đọc sách"] },
+                { id: "q2", text: "Trung bình thời gian xem video ngắn liên tục không nghỉ của em là bao lâu?", options: ["Dưới 30 phút, kiểm soát tốt", "Từ 1 - 2 tiếng, đôi khi quên giờ", "Trên 3 tiếng, xem quên ăn quên ngủ", "Xem vô thức bất cứ lúc nào rảnh tay"] }
+            ]},
+            week4: { title: "Cấp độ 5 - Tuần 4: Tư Duy Độc Lập Học Đường", questions: [
+                { id: "q1", text: "Khi thầy cô đưa ra một vấn đề, em có xu hướng ứng xử thế nào?", options: ["Tự suy luận tìm bản chất, đưa góc nhìn riêng", "Chờ chép lời giải mẫu của giáo viên/sách bài giải", "Làm theo số đông các bạn trong lớp", "Không suy nghĩ, để đầu óc trống rỗng"] },
+                { id: "q2", text: "Em có dám thẳng thắn bày tỏ ý kiến đóng góp mang tính xây dựng với cán bộ lớp/thầy cô?", options: ["Sẵn sàng góp ý chân thành, lịch sự", "Ngại ngùng giấu kín, sợ bị để ý", "Nói xấu, phàn nàn sau lưng với bạn bè", "Thờ ơ, ai làm gì cũng được"] }
+            ]},
+            week5: { title: "Cấp độ 5 - Tuần 5: Bảo Mật Và An Toàn Không Gian Số", questions: [
+                { id: "q1", text: "Em quản lý thông tin cá nhân (mật khẩu, hình ảnh riêng tư) trên mạng ra sao?", options: ["Bảo mật cực tốt, không chia sẻ cho ai", "Đôi khi cho bạn thân thiết biết tài khoản", "Đăng tải công khai thoải mái không nghĩ ngợi", "Từng bị hack hoặc lộ thông tin cá nhân"] },
+                { id: "q2", text: "Khi gặp một người lạ kết bạn và nhắn tin hỏi han sâu về đời tư trên mạng, em sẽ?", options: ["Cảnh giác, chặn hoặc từ chối trả lời", "Nhắn tin trò chuyện vui vẻ, tin tưởng", "Hỏi ý kiến cha mẹ/thầy cô ngay lập tức", "Chia sẻ thật lòng để tìm kiếm bạn mới"] }
+            ]}
+        },
+        6: { // LEVEL 6: SỰ TỰ TIN VÀ TỰ TRỌNG BẢN THÂN (SELF-ESTEEM)
+            week1: { title: "Cấp độ 6 - Tuần 1: Yêu Thương Ngoại Hình", questions: [
+                { id: "q1", text: "Khi nhìn mình trong gương, cảm xúc chủ đạo của em là gì?", options: ["Tự tin, trân trọng nét riêng của bản thân", "Bình thường, không quá chú ý", "Tự ti, luôn thấy mình nhiều khuyết điểm", "Cực kỳ ghét bỏ và muốn thay đổi hoàn toàn"] },
+                { id: "q2", text: "Lời chê bai của người khác về ngoại hình ảnh hưởng đến em thế nào?", options: ["Mỉm cười bỏ qua, không bận tâm", "Hơi buồn một chút rồi quên ngay", "Ám ảnh, nhịn ăn hoặc tìm cách thay đổi cực đoan", "Tức giận và sinh sự cãi vã với người chê"] }
+            ]},
+            week2: { title: "Cấp độ 6 - Tuần 2: Khẳng Định Giá Trị Nội Tại", questions: [
+                { id: "q1", text: "Em tự đánh giá mình có phải là một người có giá trị và hữu ích?", options: ["Chắc chắn có, em có những điểm mạnh riêng", "Bình thường như bao người khác", "Đôi lúc thấy mình vô dụng, kém cỏi", "Hoàn toàn là gánh nặng cho mọi người"] },
+                { id: "q2", text: "Khi đứng trước đám đông thuyết trình, em cảm thấy ra sao?", options: ["Tự tin, dõng dạc truyền tải nội dung", "Hơi run nhưng vẫn hoàn thành được", "Sợ hãi, lắp bắp, quên hết bài vở", "Trốn tránh, tuyệt đối không bao giờ làm"] }
+            ]},
+            week3: { title: "Cấp độ 6 - Tuần 3: Vượt Qua Nỗi Sợ Bị Phán Xét", questions: [
+                { id: "q1", text: "Em có dám mặc một bộ đồ mình thích hay làm điều mình yêu dù khác biệt với số đông?", options: ["Sẵn sàng thể hiện cá tính văn minh", "Hơi e dè, nhìn sắc mặt bạn bè trước", "Từ bỏ sở thích để giống hệt đám đông", "Chỉ dám làm khi ở nhà một mình"] },
+                { id: "q2", text: "Nỗi sợ bị người khác cười chê có đang kìm hãm ước mơ của em không?", options: ["Không, em kiên định mục tiêu cá nhân", "Có kìm hãm một vài phần lựa chọn", "Ảnh hưởng rất lớn, khiến em sợ hãi không dám thử", "Em không có ước mơ gì cụ thể"] }
+            ]},
+            week4: { title: "Cấp độ 6 - Tuần 4: Lòng Tự Trọng Học Đường", questions: [
+                { id: "q1", text: "Đứng trước hành vi gian lận thi cử (quay cóp, chép bài), em chọn góc nhìn nào?", options: ["Kiên quyết nói không, bảo vệ thực lực", "Thỉnh thoảng cứu trợ bạn bè hoặc xem bài vì điểm số", "Xem đó là kỹ năng bắt buộc để sinh tồn học đường", "Gian lận thường xuyên để có thành tích cao"] },
+                { id: "q2", text: "Khi làm sai một việc có lỗi với tập thể, em ứng xử thế nào?", options: ["Dũng cảm nhận lỗi và sửa sai ngay", "Im lặng chờ mọi chuyện qua đi", "Đổ lỗi cho hoàn cảnh hoặc người khác", "Chối bay biến để bảo vệ danh dự"] }
+            ]},
+            week5: { title: "Cấp độ 6 - Tuần 5: Tự Trấn An Khủng Hoảng", questions: [
+                { id: "q1", text: "Mỗi khi tinh thần rơi xuống đáy sâu thất vọng, câu nói nào em hay tự nhủ nhất?", options: ["'Mọi chuyện rồi sẽ ổn, mình làm được!'", "'Tại sao số phận mình lại đen đủi vậy?'", "'Buông xuôi đi, cố gắng cũng chẳng ích gì'", "Em không nói gì, chỉ khóc và im lặng"] },
+                { id: "q2", text: "Em có kỹ năng nhận diện và giải tỏa các suy nghĩ độc hại (Overthinking)?", options: ["Biết cách hướng suy nghĩ sang việc tích cực", "Hay bị cuốn vào vòng lặp suy nghĩ không dứt", "Để mặc cho suy nghĩ thao túng tâm trạng", "Em không biết overthinking là gì"] }
+            ]}
+        },
+        7: { // LEVEL 7: QUẢN LÝ THỜI GIAN VÀ CÂN BẰNG CUỘC SỐNG
+            week1: { title: "Cấp độ 7 - Tuần 1: Ma Trận Ưu Tiên (Eisenhower)", questions: [
+                { id: "q1", text: "Em sắp xếp thứ tự ưu tiên các công việc trong ngày dựa trên tiêu chí nào?", options: ["Việc quan trọng và khẩn cấp làm trước", "Việc nào thích thì làm trước, ghét làm sau", "Đụng đâu làm đó, không có kế hoạch", "Chỉ làm những việc bị thúc ép sát nút"] },
+                { id: "q2", text: "Hôm nay em có dành thời gian cho một việc quan trọng nhưng không khẩn cấp (như đọc sách, thể thao)?", options: ["Có, em duy trì đều đặn", "Có dự định nhưng chưa sắp xếp được", "Không có thời gian cho việc đó", "Em thấy việc đó lãng phí thời gian"] }
+            ]},
+            week2: { title: "Cấp độ 7 - Tuần 2: Cân Bằng Học Tập & Giải Trí", questions: [
+                { id: "q1", text: "Tỷ lệ phân bổ thời gian giữa học tập và giải trí của em hôm nay ra sao?", options: ["Cân bằng hợp lý, tinh thần thoải mái", "Học quá nhiều, kiệt sức không kịp thở", "Chơi quá đà, sa sút bài vở học tập", "Chưa học chưa chơi ra trò, vật vờ"] },
+                { id: "q2", text: "Em có cảm thấy tội lỗi khi dành thời gian nghỉ ngơi thư giãn không?", options: ["Không, nghỉ ngơi giúp em học tốt hơn", "Thỉnh thoảng thấy bứt rứt vì chưa xong bài", "Luôn luôn lo lắng, không thể nghỉ ngơi trọn vẹn", "Em chơi thoải mái không lo nghĩ gì"] }
+            ]},
+            week3: { title: "Cấp độ 7 - Tuần 3: Đồng Hồ Sinh Học Sức Khỏe", questions: [
+                { id: "q1", text: "Giờ đi ngủ trung bình mỗi tối gần đây của em duy trì như thế nào?", options: ["Trước 22h30, ngủ đủ giấc", "Từ 22h30 - 23h30, tạm ổn", "Sau 23h30, thường xuyên mệt mỏi", "Sau 1h sáng, cú đêm chính hiệu"] },
+                { id: "q2", text: "Em có thói quen ăn sáng đầy đủ trước khi đến trường học tập không?", options: ["Ăn đều đặn mỗi ngày, đủ chất", "Thỉnh thoảng bỏ bữa vì dậy muộn", "Hầu như không ăn, chỉ uống nước ngọt/sữa", "Không bao giờ ăn sáng"] }
+            ]},
+            week4: { title: "Cấp độ 7 - Tuần 4: Quản Lý Sự Phân Tâm Công Nghệ", questions: [
+                { id: "q1", text: "Khi đang ngồi học, tiếng thông báo điện thoại vang lên, em sẽ?", options: ["Ngó lơ, tập trung học tiếp đến giờ nghỉ", "Cầm lên check ngay rồi bị cuốn đi luôn", "Tắt thông báo/để điện thoại phòng khác", "Vừa học vừa bật phim/nhạc xem song song"] },
+                { id: "q2", text: "Em đánh giá mức độ nghiện điện thoại thông minh của mình ở thang điểm mấy?", options: ["Nhe nhẹ (Làm chủ được thiết bị)", "Trung bình (Thiếu điện thoại thấy hơi bồn chồn)", "Nặng (Luôn cầm điện thoại vô thức)", "Cực nặng (Không thể sống thiếu điện thoại quá 10 phút)"] }
+            ]},
+            week5: { title: "Cấp độ 7 - Tuần 5: Thời Gian Dành Cho Gia Đình", questions: [
+                { id: "q1", text: "Trung bình một ngày em trò chuyện, chia sẻ trực tiếp với cha mẹ bao lâu?", options: ["Trên 30 phút, tình cảm khăng khít", "Chỉ nói vài câu cần thiết rồi về phòng", "Hầu như không nói chuyện, có khoảng cách lớn", "Thường xuyên xảy ra tranh cãi, khắc khẩu"] },
+                { id: "q2", text: "Em có chủ động đỡ đần việc nhà (nấu cơm, quét nhà, rửa bát) giúp gia đình?", options: ["Tự giác làm mỗi ngày không cần nhắc", "Chỉ làm khi bị bố mẹ thúc giục, ra lệnh", "Hiếm khi làm vì bận học tập", "Không bao giờ động tay vào việc gì"] }
+            ]}
+        },
+        8: { // LEVEL 8: TRÍ TUỆ CẢM XÚC (EQ) VÀ THẤU CẢM XÃ HỘI
+            week1: { title: "Cấp độ 8 - Tuần 1: Nhận Diện Nỗi Buồn Của Người Khác", questions: [
+                { id: "q1", text: "Khi thấy một người bạn trong lớp đang ngồi khóc hoặc gục mặt buồn bã, em sẽ làm gì?", options: ["Đến hỏi han, lắng nghe và an ủi chân thành", "Nhờ một người bạn thân của họ đến giúp đỡ", "Nhìn xem rồi lờ đi vì không phải việc của mình", "Đem chuyện đó ra bàn tán, trêu chọc"] },
+                { id: "q2", text: "Em có khả năng đoán biết tâm trạng của cha mẹ khi họ đi làm về mệt mỏi?", options: ["Nhận biết rất nhạy, biết cách ứng xử khéo", "Thỉnh thoảng nhận ra khi bố mẹ cáu gắt", "Vô tư không chú ý đến sắc mặt người lớn", "Không quan tâm cảm xúc của bất kỳ ai"] }
+            ]},
+            week2: { title: "Cấp độ 8 - Tuần 2: Sức Mạnh Của Lời Nói Tử Tế", questions: [
+                { id: "q1", text: "Lần gần nhất em dành một lời khen ngợi chân thành cho ai đó là khi nào?", options: ["Hôm nay / Mới gần đây thôi", "Tuần trước / Khi họ làm việc xuất sắc", "Lâu lắm rồi em không khen ai", "Em chưa bao giờ khen ngợi người khác"] },
+                { id: "q2", text: "Khi tranh luận, em chọn cách dùng ngôn từ như thế nào để bảo vệ ý kiến?", options: ["Lịch sự, tôn trọng, không công kích cá nhân", "Hơi gắt gỏng nếu đối phương cứng đầu", "Dùng từ ngữ mạnh, hạ bệ danh dự đối phương", "Chửi bới, xúc phạm để giành chiến thắng"] }
+            ]},
+            week3: { title: "Cấp độ 8 - Tuần 3: Vượt Qua Định Kiến Xã Hội", questions: [
+                { id: "q1", text: "Đối với những bạn có hoàn cảnh khó khăn hoặc ngoại hình đặc biệt, em đối xử ra sao?", options: ["Bình đẳng, tôn trọng và sẵn sàng giúp đỡ", "Bình thường, không thân thiết cũng không kỳ thị", "Hơi e dè, tránh tiếp xúc gần", "Kỳ thị, hùa theo đám đông cô lập, trêu chọc"] },
+                { id: "q2", text: "Em nghĩ gì về việc một người dám sống thật với cá tính và xu hướng của họ?", options: ["Hoàn toàn ủng hộ, tôn trọng quyền cá nhân", "Không phản đối nhưng không muốn tiếp cận", "Thấy kỳ dị, không thuận mắt", "Lên án, bài xích cực đoan"] }
+            ]},
+            week4: { title: "Cấp độ 8 - Tuần 4: Kỹ Năng Lắng Nghe Chủ Động (Active Listening)", questions: [
+                { id: "q1", text: "Khi người khác đang tâm sự chuyện buồn, thói quen lắng nghe của em là?", options: ["Chăm chú nghe, không ngắt lời, thấu cảm", "Vừa nghe vừa bấm điện thoại làm việc riêng", "Hay ngắt lời để đưa ra lời khuyên dạy đời", "Nghe qua loa rồi chuyển sang kể chuyện mình"] },
+                { id: "q2", text: "Em có giữ bí mật tuyệt đối khi bạn bè tin tưởng kể cho nghe chuyện riêng tư?", options: ["Giữ lời hứa, tuyệt đối không hé răng", "Chỉ kể thêm cho 1-2 người bạn thân khác nghe", "Vô tình nói ra trong lúc buôn chuyện phiếm", "Đem làm vũ khí nói xấu khi rạn nứt tình bạn"] }
+            ]},
+            week5: { title: "Cấp độ 8 - Tuần 5: Trách Nhiệm Với Cộng Đồng", questions: [
+                { id: "q1", text: "Em ứng xử thế nào với rác thải cá nhân khi ở trường hoặc nơi công cộng?", options: ["Bỏ đúng nơi quy định, nhặt rác xung quanh", "Cầm trên tay chờ thấy thùng rác mới vứt", "Tiện đâu vứt đấy khi không có ai nhìn thấy", "Vứt bừa bãi vì có lao công dọn dẹp"] },
+                { id: "q2", text: "Em có hứng thú tham gia các hoạt động tình nguyện, bảo vệ môi trường của trường?", options: ["Rất hào hứng, tham gia tích cực", "Tham gia vì nghĩa vụ thi đua bắt buộc", "Né tránh, tìm lý do trốn tránh", "Cho là hoạt động bao đồng, lãng phí thời gian"] }
+            ]}
+        },
+        9: { // LEVEL 9: TƯ DUY PHÁT TRIỂN (GROWTH MINDSET) VÀ SỰ KIÊN TÂM
+            week1: { title: "Cấp độ 9 - Tuần 1: Tư Duy Phát Triển Đối Đầu Tư Duy Cố Định", questions: [
+                { id: "q1", text: "Khi học dốt một môn học, em chọn cách suy nghĩ nào dưới đây?", options: ["Do mình chưa tìm đúng cách, cố gắng sẽ giỏi", "Do não mình không có khiếu, cố cũng vô ích", "Do thầy cô dạy chán, không muốn học", "Bỏ mặc môn đó, tập trung môn tủ thôi"] },
+                { id: "q2", text: "Em nhìn nhận lời góp ý, phê bình thẳng thắn từ thầy cô như thế nào?", options: ["Cơ hội vàng để soi lỗi sai và tiến bộ", "Sự chỉ trích, trù dập, ghét bỏ mình", "Xấu hổ trước lớp, ôm hận trong lòng", "Bỏ ngoài tai, không thèm bận tâm"] }
+            ]},
+            week2: { title: "Cấp độ 9 - Tuần 2: Khám Phá Vùng An Toàn (Comfort Zone)", questions: [
+                { id: "q1", text: "Đứng trước một thử thách hoàn toàn mới (ví dụ cuộc thi lớn), em chọn?", options: ["Dũng cảm đăng ký thử sức để học hỏi", "Đắn đo hồi lâu rồi từ bỏ vì sợ thất bại", "Chỉ tham gia khi được ép buộc chỉ định", "Từ chối ngay, trung thành với vùng an toàn"] },
+                { id: "q2", text: "Lần cuối cùng em học thêm một kỹ năng mới tinh (đàn, vẽ, code, thể thao) là khi nào?", options: ["Trong tháng này, em thích học điều mới", "Vài tháng trước / Nghỉ hè năm ngoái", "Lâu lắm rồi em không học gì mới", "Em chưa bao giờ tự học kỹ năng ngoài"] }
+            ]},
+            week3: { title: "Cấp độ 9 - Tuần 3: Sức Mạnh Của Sự Kiên Trì (Grit)", questions: [
+                { id: "q1", text: "Khi bắt đầu một dự án hay kế hoạch (như giảm cân, học tiếng anh), em duy trì được bao lâu?", options: ["Kiên trì đến cùng đạt mục tiêu đề ra", "Bỏ cuộc sau 1-2 tuần đầu tiên vì nản", "Hứng lên làm được vài ngày rồi quên luôn", "Thèm thuồng kế hoạch nhưng chưa bao giờ bắt đầu"] },
+                { id: "q2", text: "Điều gì cản trở tính kiên trì của em lớn nhất trong ngày hôm nay?", options: ["Sự lười biếng, cám dỗ giải trí tức thời", "Thiếu một kế hoạch hành động rõ ràng", "Nỗi sợ làm không tốt nên nản lòng", "Không gặp cản trở, em cực kỳ kỷ luật"] }
+            ]},
+            week4: { title: "Cấp độ 9 - Tuần 4: Quản Lý Sự Kỳ Vọng", questions: [
+                { id: "q1", text: "Em đối phó thế nào với kỳ vọng quá cao từ gia đình đặt lên vai mình?", options: ["Thẳng thắn tâm sự để cha mẹ hiểu thực lực", "Im lặng chịu đựng, dồn nén thành stress u uất", "Phản kháng tiêu cực, quậy phá chống đối", "Bỏ mặc ngoài tai, làm được đến đâu thì làm"] },
+                { id: "q2", text: "Em có đang đặt ra những tiêu chuẩn quá hoàn hảo, khắt khe độc hại cho chính mình?", options: ["Không, em biết chấp nhận thiếu sót văn minh", "Có một chút, đôi khi tự làm khổ mình", "Rất nặng nề, luôn dằn vặt nếu làm sai", "Em sống buông thả, không có tiêu chuẩn"] }
+            ]},
+            week5: { title: "Cấp độ 9 - Tuần 5: Định Hình Lại Thách Thức", questions: [
+                { id: "q1", text: "Khi cuộc sống đẩy em vào hoàn cảnh vô cùng ngặt nghèo, em nhìn nhận nó là gì?", options: ["Lò luyện giúp mình cứng cáp, bản lĩnh hơn", "Sự bất công, đen đủi của số phận dành cho mình", "Điềm báo mình là kẻ thất bại thảm hại", "Cam chịu và buông xuôi cho dòng đời đưa đẩy"] },
+                { id: "q2", text: "Hôm nay, mức độ tự tin vào tương lai tươi sáng của em đạt điểm mấy?", options: ["10 điểm (Cực kỳ lạc quan, vững tin)", "7-8 điểm (Tin tưởng có cơ sở)", "4-5 điểm (Mơ hồ, lo âu nhiều hơn)", "1-2 điểm (Tuyệt vọng, tối tăm)"] }
+            ]}
+        },
+        10: { // LEVEL 10: TRƯỞNG THÀNH TOÀN DIỆN VÀ ĐỊNH HÌNH TƯƠNG LAI
+            week1: { title: "Cấp độ 10 - Tuần 1: Nhận Thức Sứ Mệnh Cuộc Đời", questions: [
+                { id: "q1", text: "Em đã từng suy nghĩ nghiêm túc về lý tưởng sống hay giá trị cốt lõi mình theo đuổi?", options: ["Đã định hình rõ giá trị sống của bản thân", "Đang trong quá trình tìm kiếm suy ngẫm", "Thỉnh thoảng nghĩ qua rồi thôi", "Chưa bao giờ nghĩ, sống ngày nào hay ngày nấy"] },
+                { id: "q2", text: "Hình mẫu lý tưởng trưởng thành mà em mong muốn trở thành trong tương lai là ai?", options: ["Một người tài giỏi, có cống hiến lớn", "Một người giàu có, tự do tài chính", "Một người bình an, hạnh phúc giản dị", "Em chưa có hình mẫu nào để hướng tới"] }
+            ]},
+            week2: { title: "Cấp độ 10 - Tuần 2: Định Hướng Nghề Nghiệp Sớm", questions: [
+                { id: "q1", text: "Mức độ hiểu biết của em về ngành nghề mình mong muốn theo học sau này?", options: ["Tìm hiểu rất kỹ về lộ trình và tố chất", "Chỉ biết tên ngành qua mạng, chưa rõ chi tiết", "Chọn đại theo định hướng, ép buộc từ gia đình", "Hoàn toàn mông lung, chưa nghĩ đến hướng đi"] },
+                { id: "q2", text: "Em có đang chủ động tích lũy các năng lực cốt lõi cho nghề nghiệp tương lai ngay bây giờ?", options: ["Tích cực rèn luyện ngoại ngữ, kỹ năng mềm", "Chỉ tập trung học gạo các môn thi đại học", "Có ý định học nhưng toàn lười biếng bỏ qua", "Không làm gì, nước đến chân mới nhảy"] }
+            ]},
+            week3: { title: "Cấp độ 10 - Tuần 3: Làm Chủ Tài Chính Cá Nhân", questions: [
+                { id: "q1", text: "Thói quen quản lý tiền tiêu vặt, tiền mừng tuổi của em hiện nay?", options: ["Gửi tiết kiệm, chi tiêu khoa học có ghi chép", "Chỉ tiêu vào việc thực sự cần thiết học tập", "Có tiền là tiêu hết ngay vào ăn chơi, mua sắm", "Em không được cầm tiền, bố mẹ quản hết"] },
+                { id: "q2", text: "Em nhìn nhận thế nào về giá trị của đồng tiền và sức lao động của cha mẹ?", options: ["Trân trọng sâu sắc, không dám lãng phí một đồng", "Biết bố mẹ vất vả nhưng đôi khi vẫn đòi hỏi", "Thấy chu cấp là nghĩa vụ hiển nhiên của người lớn", "Không quan tâm tiền từ đâu ra, miễn có tiêu"] }
+            ]},
+            week4: { title: "Cấp độ 10 - Tuần 4: Bản Lĩnh Độc Lập Trưởng Thành", questions: [
+                { id: "q1", text: "Khi phải tự mình đưa ra một quyết định hệ trọng thay đổi cuộc đời, em sẽ?", options: ["Tự nghiên cứu, chịu trách nhiệm 100% lựa chọn", "Giao toàn quyền quyết định cho cha mẹ làm thay", "Hỏi ý kiến tất cả mọi người rồi đẽo cày giữa đường", "Trốn tránh quyết định, phó mặc cho số phận"] },
+                { id: "q2", text: "Mức độ độc lập trong sinh hoạt và tư duy của em hiện tại đạt mức nào?", options: ["Tự lập hoàn toàn, không cần ai nhắc nhở", "Khá tốt, cần nhắc nhở nhẹ vài việc nhỏ", "Phụ thuộc lớn vào sự chăm sóc của gia đình", "Hoàn toàn thụ động, như một đứa trẻ"] }
+            ]},
+            week5: { title: "Cấp độ 10 - Tuần 5: Tổng Kết Hành Trình Tâm Lý", questions: [
+                { id: "q1", text: "Trải qua chuỗi ngày rèn luyện nhận thức, em thấy tâm lý mình thay đổi thế nào?", options: ["Vững vàng, thấu hiểu và làm chủ cảm xúc tốt hơn", "Có tiến bộ nhẹ, nhận thức được lỗi sai bản thân", "Chưa thấy thay đổi gì nhiều, vẫn như cũ", "Tâm lý ngày càng rối rắm phức tạp hơn"] },
+                { id: "q2", text: "Em có sẵn sàng lan tỏa năng lượng tích cực này đến cộng đồng xung quanh?", options: ["Sẵn sàng đồng hành giúp đỡ các bạn khác", "Chỉ giữ cho bản thân tốt lên là đủ", "Thôi, lo thân mình chưa xong bao đồng làm gì", "Em không quan tâm đến hành trình này nữa"] }
+            ]}
+        }
+    };
+
+    let savedUser = localStorage.getItem("user");
+    let senderName = "Khách", senderClass = "N/A", senderId = "N/A", selectedAvatarEmoji = "👤";
+    let userCurrentStreak = 0;
+    let userLastActiveDate = "";
+    let userCurrentLevel = 1; // Mặc định khởi tạo cấp độ 1
+
+    // THUẬT TOÁN TỰ ĐỘNG XÁC ĐỊNH TUẦN THỰC TẾ TRONG NĂM ĐỂ XOAY VÒNG 5 TUẦN CHỐNG NHÀM CHÁN (WEEK 1 -> WEEK 5)
+    function getCurrentWeekIndex() {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 1);
+        const diff = now - start;
+        const oneDay = 1000 * 60 * 60 * 24;
+        const dayOfYear = Math.floor(diff / oneDay);
+        const weekOfYear = Math.ceil((dayOfYear + start.getDay() + 1) / 7);
+        return ((weekOfYear - 1) % 5) + 1; // Quy về vòng lặp tuần từ 1 đến 5
+    }
+    
+    const currentWeekKey = `week${getCurrentWeekIndex()}`;
+
+    window.getAvatarHtml = function(avatarString) {
+        if (!avatarString) return "👤";
+        if (avatarString.startsWith("data:image") || avatarString.startsWith("http")) {
+            return `<img src="${avatarString}" style="width:100%; height:100%; border-radius:50%; object-fit:cover; display:block;">`;
+        }
+        return avatarString;
+    }
+
+    if(savedUser) {
+        let user = JSON.parse(savedUser);
+        senderId = user.id || "N/A"; senderName = user.name || "Người dùng ẩn danh"; senderClass = user.class || "N/A";
+        selectedAvatarEmoji = user.avatar || "👤";
+        
+        document.getElementById("profileName").innerText = senderName; 
+        document.getElementById("profileClass").innerText = `Lớp ${senderClass} - THCS`; 
+        document.querySelector(".user-profile-widget .user-avatar-circle").innerHTML = window.getAvatarHtml(selectedAvatarEmoji);
+    } else {
+        alert("⚠️ Vui lòng đăng nhập hệ thống trước!");
+        window.location.href = "index.html";
+    }
+
+    // ĐỘNG CƠ TẠO CÂU HỎI THEO LEVEL HIỆN TẠI CỦA HỌC SINH VÀ TUẦN XOAY VÒNG TỰ ĐỘNG
+    function generateDynamicQuestions() {
+        const levelConfig = surveyLevelsPool[userCurrentLevel] || surveyLevelsPool[1];
+        const surveyConfig = levelConfig[currentWeekKey] || levelConfig["week1"];
+        
+        document.getElementById("surveyTitleHeader").innerHTML = `<i class="fa-solid fa-clipboard-question" style="color:#1a73e8;"></i> ${surveyConfig.title}`;
+        document.getElementById("levelDisplayTag").innerText = `LEVEL ${userCurrentLevel}/10`;
+        
+        const area = document.getElementById("dynamicQuestionsArea");
+        let html = "";
+        
+        surveyConfig.questions.forEach((q, index) => {
+            html += `
+                <div class="survey-q-box">
+                    <h4>${index + 1}. ${q.text}</h4>
+                    <div class="survey-options-grid">
+                        ${q.options.map(opt => `
+                            <label class="survey-label">
+                                <input type="radio" name="${q.id}" value="${opt}" required> ${opt}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>`;
+        });
+        
+        area.innerHTML = html;
+        setupRadioVisualEffects();
+    }
+
+    function setupRadioVisualEffects() {
+        const labels = document.querySelectorAll('.survey-label');
+        labels.forEach(label => {
+            const radio = label.querySelector('input[type="radio"]');
+            radio.addEventListener('change', () => {
+                document.querySelectorAll(`.survey-label input[name="${radio.name}"]`).forEach(input => {
+                    input.parentElement.classList.remove('selected');
+                });
+                if(radio.checked) {
+                    label.classList.add('selected');
+                }
+            });
+        });
+    }
+
+    // ĐỒNG BỘ DỮ LIỆU LEVEL VÀ STREAK TỪ ĐÁM MÂY FIREBASE REALTIME DATABASE
+    function listenMyStreakData() {
+        if(senderId === "N/A") return;
+        onValue(ref(db, `users/${senderId}`), (snapshot) => {
+            if(snapshot.exists()){
+                let u = snapshot.val();
+                userCurrentStreak = u.currentStreak || 0;
+                userLastActiveDate = u.lastActiveDate || "";
+                userCurrentLevel = u.currentLevel || 1; // Lấy dữ liệu cấp độ thực tế của học sinh từ Cloud
+                
+                document.getElementById("streakNumberDisplay").innerText = userCurrentStreak;
+                
+                // Khởi chạy sinh câu hỏi theo đúng Level hiện tại của học sinh
+                generateDynamicQuestions();
+                
+                const todayStr = new Date().toLocaleDateString('en-CA'); 
+                if(userLastActiveDate === todayStr) {
+                    document.getElementById("streakMotivationText").innerHTML = `🎉 Tuyệt vời! Bạn đã hoàn thành khảo sát <b>Cấp độ ${userCurrentLevel}</b> hôm nay. Hãy quay lại vào ngày mai để tiếp tục thăng tiến chặng đường tiếp theo!`;
+                } else {
+                    document.getElementById("streakMotivationText").innerHTML = `🔥 Bạn đang ở <b>Level ${userCurrentLevel}/10</b>. Hãy trả lời bộ câu hỏi kiểm thử tâm lý hôm nay để giữ chuỗi và nâng cấp nhận thức!`;
+                }
+            }
+        });
+    }
+
+    // XỬ LÝ LƯU KẾT QUẢ KHẢO SÁT & TĂNG TIẾN LEVEL (KHOÁ TIẾN TRÌNH: PHẢI XONG LEVEL CŨ MỚI LÊN LEVEL MỚI)
+    window.submitDailySurvey = function() {
+        let form = document.getElementById("dailySurveyForm");
+        if(!form.checkValidity()) {
+            alert("⚠️ Vui lòng hoàn thành đầy đủ các câu hỏi khảo sát nhận thức của cấp độ hiện tại!");
+            return;
+        }
+
+        let q1 = form.elements["q1"].value;
+        let q2 = form.elements["q2"].value;
+        const todayStr = new Date().toLocaleDateString('en-CA');
+        let updatedStreak = userCurrentStreak;
+
+        // Tính toán chuỗi liên tục (Streak)
+        if (userLastActiveDate === "") {
+            updatedStreak = 1;
+        } else if (userLastActiveDate === todayStr) {
+            updatedStreak = userCurrentStreak;
+        } else {
+            const lastDateObj = new Date(userLastActiveDate);
+            const todayDateObj = new Date(todayStr);
+            const diffTime = Math.abs(todayDateObj - lastDateObj);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) {
+                updatedStreak = userCurrentStreak + 1;
+            } else {
+                updatedStreak = 1; // Đứt chuỗi, thiết lập lại từ ngày đầu
+            }
+        }
+
+        // Kiểm tra logic tăng tiến cấp độ (Mỗi ngày hoàn thành khảo sát được nâng lên 1 Level, max là Level 10)
+        let nextLevel = userCurrentLevel;
+        if (userLastActiveDate !== todayStr) {
+            if (userCurrentLevel < 10) {
+                nextLevel = userCurrentLevel + 1;
+            } else {
+                nextLevel = 10; // Đạt cấp độ tối đa
+            }
+        }
+
+        let timestamp = Date.now();
+        const levelConfig = surveyLevelsPool[userCurrentLevel] || surveyLevelsPool[1];
+        const surveyConfig = levelConfig[currentWeekKey] || levelConfig["week1"];
+        
+        // 1. Lưu trữ lịch sử khảo sát chi tiết lên Firebase phục vụ nghiên cứu tâm lý học đường
+        set(ref(db, `surveys/${senderId}/${timestamp}`), {
+            studentId: senderId,
+            name: senderName,
+            schoolClass: `Lớp ${senderClass}`,
+            surveyTitle: surveyConfig.title,
+            currentLevel: userCurrentLevel,
+            currentWeek: currentWeekKey,
+            answers: { q1, q2 },
+            dateStr: todayStr,
+            timestamp: timestamp
+        });
+
+        // 2. Cập nhật hồ sơ năng lực học sinh (Đồng bộ Chuỗi lửa & Mở khóa Cấp độ tiếp theo)
+        get(child(ref(db), `users/${senderId}`)).then((snapshot) => {
+            let userData = snapshot.exists() ? snapshot.val() : {};
+            userData.currentStreak = updatedStreak;
+            userData.lastActiveDate = todayStr;
+            userData.currentLevel = nextLevel; // Ghi nhận nâng cấp Level mới lên cơ sở dữ liệu
+
+            set(ref(db, `users/${senderId}`), userData).then(() => {
+                confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+                
+                if (nextLevel > userCurrentLevel) {
+                    alert(`🎉 Xuất sắc! Gửi kết quả khảo sát thành công.\n🔥 Chuỗi liên tục: Mức ${updatedStreak} ngày.\n🚀 CHÚC MỪNG EM ĐÃ MỞ KHÓA THÀNH CÔNG: LEVEL ${nextLevel}/10!`);
+                } else {
+                    alert(`🎉 Gửi kết quả khảo sát thành công.\n🔥 Chuỗi liên tục: Mức ${updatedStreak} ngày.\n💪 Em đã hoàn thành trọn vẹn cấp độ tối cao (Level 10) của Nền tảng nhận thức!`);
+                }
+                
+                form.reset();
+                document.querySelectorAll('.survey-label').forEach(l => l.classList.remove('selected'));
+            });
+        });
+    }
+
+    // TẢI BẢNG XẾP HẠNG THỜI GIAN THỰC ĐỂ KÍCH THÍCH THI ĐUA GIỮA CÁC LỚP THCS
+    window.loadStreakLeaderboard = function() {
+        let lbContent = document.getElementById("streakLeaderboardContent");
+        onValue(ref(db, 'users'), (snapshot) => {
+            if(!snapshot.exists()) {
+                lbContent.innerHTML = "<p style='text-align:center; color:#94a3b8;'>Chưa có học sinh nào kích hoạt chuỗi lửa</p>";
+                return;
+            }
+            let allUsers = Object.values(snapshot.val());
+            let activeStreakUsers = allUsers.filter(u => u.currentStreak && u.currentStreak > 0);
+            activeStreakUsers.sort((a, b) => b.currentStreak - a.currentStreak);
+            
+            let html = "";
+            if(activeStreakUsers.length === 0) {
+                html = "<p style='text-align:center; padding: 15px 0; color: #94a3b8;'>🔥 Hãy là người đầu tiên tạo lập chuỗi ngày!</p>";
+            } else {
+                activeStreakUsers.slice(0, 10).forEach((item, index) => {
+                    let medal = index === 0 ? "🥇" : (index === 1 ? "🥈" : (index === 2 ? "🥉" : `<span style='display:inline-block; width:22px; text-align:center; font-weight:800; color:#64748b;'>${index+1}</span>`));
+                    let displayLvl = item.currentLevel || 1;
+                    html += `
+                        <div class='leaderboard-item'>
+                            <span>${medal} <b style="color:#334155; margin-left:5px;">${item.name}</b> <small style="color:#94a3b8; font-size:11px;">(Lớp ${item.class} - Lvl ${displayLvl})</small></span>
+                            <span class='streak-count-tag'>${item.currentStreak} ngày 🔥</span>
+                        </div>`;
+                });
+            }
+            lbContent.innerHTML = html;
+        });
+    }
+
+    // KHỞI CHẠY TOÀN BỘ HỆ THỐNG
+    listenMyStreakData();
+    window.loadStreakLeaderboard();
+</script>
+</body>
+</html>
