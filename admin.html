@@ -582,7 +582,7 @@ tr:last-child td { border-bottom: none; }
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, onValue, set, update,get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA4YeCvjrLI0bRtvotCOVfGLLsXjVJyb0",
@@ -651,44 +651,36 @@ tr:last-child td { border-bottom: none; }
             return;
         }
 
-        // Danh sách tài khoản Admin tĩnh
-        const localAdmins = {
-            "_ngpht.31_": "31032012",
-            "_tranh._": "123456",
-            "_admin.td__": "98764321"
-        };
-
-        // Kiểm tra trong danh sách tài khoản tĩnh trước (chạy tốt trên cả GitHub Pages)
-        if (localAdmins[idVal]) {
-            if (localAdmins[idVal] === inputVal) {
-                document.getElementById("authOverlay").style.display = "none";
-                document.getElementById("adminContainer").style.display = "block";
-                try { window.syncCloudSystem(); } catch(e) { console.log("Firebase SDK offline fallback active"); }
-                return;
-            } else {
-                document.getElementById("authError").style.display = "block";
-                return;
-            }
-        }
-
-        // Dự phòng: Nếu không có trong tài khoản tĩnh mới gọi lên API Server backend (nếu sau này bạn dùng hosting khác)
         try {
-            const response = await fetch('/api/admin/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username: idVal, password: inputVal })
-            });
-            const result = await response.json();
+            // Thực hiện tải dữ liệu từ nút 'admins' trên Firebase về để kiểm tra
+            const snapshot = await get(ref(db, 'admins'));
+            
+            if (snapshot.exists()) {
+                const adminsData = snapshot.val();
+                let isAuthenticated = false;
 
-            if (result.success) {
-                document.getElementById("authOverlay").style.display = "none";
-                document.getElementById("adminContainer").style.display = "block";
-                window.syncCloudSystem(); 
-            } else {
-                document.getElementById("authError").style.display = "block";
+                // Quét qua danh sách các tài khoản Admin cấu hình trên Firebase
+                for (let key in adminsData) {
+                    if (adminsData[key].id === idVal && adminsData[key].pwd === inputVal) {
+                        isAuthenticated = true;
+                        break;
+                    }
+                }
+
+                if (isAuthenticated) {
+                    // Khớp tài khoản: Ẩn màn hình khóa và kích hoạt đồng bộ dữ liệu hệ thống
+                    document.getElementById("authOverlay").style.display = "none";
+                    document.getElementById("adminContainer").style.display = "block";
+                    window.syncCloudSystem();
+                    return;
+                }
             }
+            
+            // Nếu không khớp tài khoản nào hoặc nút dữ liệu trống
+            document.getElementById("authError").style.display = "block";
+            
         } catch (error) {
-            alert("❌ Lỗi kết nối đến Server xác thực: " + error);
+            alert("❌ Lỗi kết nối xác thực đến Firebase: " + error.message);
         }
     }
 
