@@ -651,14 +651,16 @@ tr:last-child td { border-bottom: none; }
             return;
         }
 
-        if (window.location.protocol === 'file:') {
-            const localAdmins = {
-                "_ngpht.31_": "31032012",
-                "_tranh._": "123456",
-                "_admin.td__": "98764321"
-            };
+        // Danh sách tài khoản Admin tĩnh
+        const localAdmins = {
+            "_ngpht.31_": "31032012",
+            "_tranh._": "123456",
+            "_admin.td__": "98764321"
+        };
 
-            if (localAdmins[idVal] && localAdmins[idVal] === inputVal) {
+        // Kiểm tra trong danh sách tài khoản tĩnh trước (chạy tốt trên cả GitHub Pages)
+        if (localAdmins[idVal]) {
+            if (localAdmins[idVal] === inputVal) {
                 document.getElementById("authOverlay").style.display = "none";
                 document.getElementById("adminContainer").style.display = "block";
                 try { window.syncCloudSystem(); } catch(e) { console.log("Firebase SDK offline fallback active"); }
@@ -669,6 +671,7 @@ tr:last-child td { border-bottom: none; }
             }
         }
 
+        // Dự phòng: Nếu không có trong tài khoản tĩnh mới gọi lên API Server backend (nếu sau này bạn dùng hosting khác)
         try {
             const response = await fetch('/api/admin/login', {
                 method: 'POST',
